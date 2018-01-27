@@ -22,6 +22,8 @@ WORKDIR /usr/src/app
 COPY virtualization/Docker/ virtualization/Docker/
 RUN virtualization/Docker/setup_docker_prereqs
 
+RUN virtualization/Docker/additional_packages
+
 # Install hass component dependencies
 COPY requirements_all.txt requirements_all.txt
 # Uninstall enum34 because some dependencies install it but breaks Python 3.4+.

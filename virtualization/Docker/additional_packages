@@ -1,0 +1,38 @@
+#!/bin/bash
+# Install requirements and build dependencies for Home Assistant in Docker.
+
+# Stop on errors
+set -e
+
+INSTALL_NETCAT="${INSTALL_NETCAT:-yes}"
+INSTALL_NETMAP="${INSTALL_NMAP:-yes}"
+INSTALL_PICOTTS="${INSTALL_PICOTTS:-yes}"
+
+apt-get update
+
+if [ "$INSTALL_NETCAT" == "yes" ]; then
+	apt-get install -y --no-install-recommends netcat
+fi
+
+if [ "$INSTALL_NMAP" == "yes" ]; then
+	apt-get install -y --no-install-recommends nmap
+fi
+
+if [ "$INSTALL_PICOTTS" == "yes" ]; then
+	# Add non-free
+ 	echo "Adding non-free"
+	sed -f- -i /etc/apt/sources.list <<- EOF
+		/^deb http:\/\/deb.debian.org\/debian/ s/$/ non-free/;
+		/^deb http:\/\/security.debian.org/ s/$/ non-free/;
+	EOF
+	apt-get update
+	apt-get install -y --no-install-recommends libttspico-utils
+fi
+
+# Remove packages
+apt-get remove -y --purge ${PACKAGES_DEV[@]}
+apt-get -y --purge autoremove
+
+# Cleanup
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/src/app/build/
